@@ -1,10 +1,14 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head><link rel="manifest" href="manifest.json"></head>
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Génies en Herbe - Haba Technologie</title>
   
+  <!-- Lien vers le Manifest PWA -->
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Configuration PWA Mobile -->
   <meta name="theme-color" content="#2563eb">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -62,7 +66,8 @@
 <body>
 
   <div class="app-container">
-    <button id="installBtn" class="btn btn-install">📲 Installer l'application</button>
+    <!-- Bouton d'installation PWA -->
+    <button id="installBtn" class="btn btn-install">📲 Installer l'application sur mon appareil</button>
 
     <header>
       <h1>Génies en Herbe</h1>
@@ -73,7 +78,7 @@
     <div id="screen-setup">
       <h3 style="text-align: center; color: var(--accent); margin-bottom: 0.5rem;">Configuration initiale</h3>
       <p style="text-align: center; margin-bottom: 1rem; color: var(--text-muted); font-size: 0.9rem;">
-        Cochez les domaines qui vous intéressent pour vos prochaines parties :
+        Cochez les domaines qui vous intéressent pour vos parties :
       </p>
 
       <div class="categories-grid" id="categories-container"></div>
@@ -213,7 +218,7 @@
         const container = document.getElementById('categories-container');
         container.innerHTML = '';
 
-        // Cases NON COCHÉES par défaut pour laisser l'utilisateur choisir lui-même
+        // Cases NON COCHÉES par défaut
         categories.forEach(cat => {
           const label = document.createElement('label');
           label.className = 'cat-checkbox';
@@ -224,7 +229,6 @@
 
       showSetupScreen() {
         this.renderCategoriesSetup();
-        // Pré-cocher celles sauvegardées si modification
         const saved = JSON.parse(localStorage.getItem('haba_selected_categories') || '[]');
         document.querySelectorAll('#categories-container input').forEach(cb => {
           if (saved.includes(cb.value)) cb.checked = true;
@@ -372,7 +376,7 @@
 
     const app = new QuizApp();
 
-    // --- SUPPORT HORS LIGNE (PWA) ---
+    // --- SUPPORT PWA ET BOUTON D'INSTALLATION AUTOMATIQUE ---
     let deferredPrompt;
     const installBtn = document.getElementById('installBtn');
 
@@ -392,9 +396,9 @@
 
     if ('serviceWorker' in navigator) {
       const swCode = `
-        const CACHE_NAME = 'genies-haba-v4';
+        const CACHE_NAME = 'genies-haba-v5';
         self.addEventListener('install', (e) => {
-          e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(['./'])));
+          e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(['./', './index.html', './manifest.json'])));
         });
         self.addEventListener('fetch', (e) => {
           e.respondWith(caches.match(e.request).then(response => response || fetch(e.request)));
