@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Génies en Herbe - Haba Technologie</title>
   
-  <!-- Configuration PWA (Application installable & hors ligne) -->
   <meta name="theme-color" content="#2563eb">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -28,19 +27,20 @@
     body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem; }
     
     .app-container { width: 100%; max-width: 650px; background: var(--card-bg); border-radius: 16px; padding: 2rem; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); position: relative; }
-    header { text-align: center; margin-bottom: 2rem; }
+    header { text-align: center; margin-bottom: 1.5rem; }
     header h1 { color: var(--accent); font-size: 1.8rem; margin-bottom: 0.2rem; }
     header p { color: var(--text-muted); font-size: 0.85rem; letter-spacing: 1px; }
 
     .btn { display: inline-block; width: 100%; padding: 0.8rem 1.5rem; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.2s; text-align: center; margin-top: 1rem; text-decoration: none; }
     .btn:hover { background: var(--primary-dark); }
+    .btn-secondary { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: var(--text-muted); margin-top: 0.5rem; font-size: 0.85rem; }
     .btn-install { background: var(--accent); color: #000; font-weight: bold; margin-bottom: 1rem; display: none; }
 
     .category-badge { display: inline-block; background: rgba(37, 99, 235, 0.2); color: #60a5fa; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; margin-bottom: 10px; border: 1px solid rgba(96, 165, 250, 0.3); }
 
     .categories-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 1.5rem 0; text-align: left; }
-    .cat-checkbox { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.05); padding: 0.8rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; font-size: 0.95rem; }
-    .cat-checkbox input { width: 18px; height: 18px; accent-color: var(--primary); }
+    .cat-checkbox { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); padding: 0.8rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; font-size: 0.95rem; }
+    .cat-checkbox input { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
 
     .input-group { margin-bottom: 1.2rem; }
     .input-group label { display: block; margin-bottom: 0.4rem; color: var(--text-muted); font-size: 0.9rem; }
@@ -62,32 +62,39 @@
 <body>
 
   <div class="app-container">
-    <!-- Bouton d'installation PWA -->
-    <button id="installBtn" class="btn btn-install">📲 Installer l'application sur mon appareil</button>
+    <button id="installBtn" class="btn btn-install">📲 Installer l'application</button>
 
     <header>
       <h1>Génies en Herbe</h1>
       <p>PAR HABA TECHNOLOGIE</p>
     </header>
 
-    <!-- Écran de sélection des thèmes -->
-    <div id="screen-welcome">
-      <p style="text-align: center; margin-bottom: 1rem; color: var(--text-muted);">
-        Choisissez les domaines qui vous passionnent pour votre partie :
+    <!-- Écran de première configuration : Choix des thèmes (S'affiche 1 seule fois au début) -->
+    <div id="screen-setup">
+      <h3 style="text-align: center; color: var(--accent); margin-bottom: 0.5rem;">Configuration initiale</h3>
+      <p style="text-align: center; margin-bottom: 1rem; color: var(--text-muted); font-size: 0.9rem;">
+        Cochez les domaines qui vous intéressent pour vos prochaines parties :
       </p>
 
-      <div class="categories-grid" id="categories-container">
-        <!-- Généré dynamiquement par JS -->
-      </div>
+      <div class="categories-grid" id="categories-container"></div>
 
-      <button class="btn" onclick="app.startQuiz()">Lancer la partie</button>
+      <button class="btn" onclick="app.saveCategoriesAndStart()">Valider mes choix et Jouer</button>
     </div>
 
-    <!-- Écran d'enregistrement obligatoire après la 1ère partie -->
+    <!-- Écran d'accueil direct (Pour les parties suivantes) -->
+    <div id="screen-welcome" class="hidden" style="text-align: center;">
+      <p style="margin-bottom: 1.5rem; color: var(--text-muted);">
+        Prêt à tester vos connaissances dans vos domaines choisis ?
+      </p>
+      <button class="btn" onclick="app.startQuiz()">Lancer une Partie (10 Questions)</button>
+      <button class="btn btn-secondary" onclick="app.showSetupScreen()">⚙️ Modifier mes domaines</button>
+    </div>
+
+    <!-- Écran d'enregistrement unique après la 1ère partie -->
     <div id="screen-register" class="hidden">
       <h2 style="text-align: center; margin-bottom: 0.5rem;">Inscription rapide</h2>
       <p style="text-align: center; color: var(--text-muted); margin-bottom: 1.5rem;">
-        Bravo pour votre première partie ! Inscrivez-vous une seule fois pour sauvegarder votre profil.
+        Bravo pour votre première partie ! Inscrivez-vous une seule fois pour enregistrer votre profil.
       </p>
       <form onsubmit="app.handleRegister(event)">
         <div class="input-group">
@@ -119,52 +126,63 @@
       <h2>Partie terminée !</h2>
       <div class="score-badge" id="final-score">0 / 10</div>
       <p id="result-message" style="color: var(--text-muted); margin-bottom: 1.5rem;"></p>
-      <button class="btn" onclick="app.showWelcome()">Rejouer / Changer de thèmes</button>
+      <button class="btn" onclick="app.startQuiz()">Rejouer une autre partie</button>
+      <button class="btn btn-secondary" onclick="app.showSetupScreen()">⚙️ Changer mes domaines</button>
     </div>
   </div>
 
   <script>
-    // --- BANQUE DE QUESTIONS PAR CATEGORIES ---
+    // --- VASTE BANQUE DE QUESTIONS DU MONDE ENTIER ---
     const questionsBank = [
-      // GÉOGRAPHIE
+      // GÉOGRAPHIE DU MONDE
       { cat: "Géographie", q: "Quelle est la capitale de la République Démocratique du Congo ?", options: ["Lubumbashi", "Kinshasa", "Goma", "Kikwit"], answer: 1 },
       { cat: "Géographie", q: "Quelle est la capitale du Cameroun ?", options: ["Douala", "Garoua", "Yaoundé", "Kribi"], answer: 2 },
       { cat: "Géographie", q: "Quelle est la capitale du Japon ?", options: ["Kyoto", "Osaka", "Tokyo", "Hiroshima"], answer: 2 },
       { cat: "Géographie", q: "Quelle est la capitale du Canada ?", options: ["Toronto", "Montréal", "Vancouver", "Ottawa"], answer: 3 },
       { cat: "Géographie", q: "Quel est le plus grand fleuve d'Afrique par son débit ?", options: ["Le Nil", "Le Fleuve Congo", "Le Niger", "Le Zambèze"], answer: 1 },
       { cat: "Géographie", q: "Quel est le plus grand pays du monde par sa superficie ?", options: ["Chine", "États-Unis", "Russie", "Brésil"], answer: 2 },
+      { cat: "Géographie", q: "Quel désert est le plus grand désert chaud du monde ?", options: ["Désert du Kalahari", "Désert de Gobi", "Le Sahara", "Désert d'Atacama"], answer: 2 },
+      { cat: "Géographie", q: "Quelle est la capitale de la Côte d'Ivoire ?", options: ["Abidjan", "Yamoussoukro", "Bouaké", "San-Pédro"], answer: 1 },
+      { cat: "Géographie", q: "Sur quel continent se trouve le Brésil ?", options: ["Afrique", "Asie", "Amérique du Sud", "Europe"], answer: 2 },
+      { cat: "Géographie", q: "Quelle est la capitale de l'Australie ?", options: ["Sydney", "Melbourne", "Canberra", "Brisbane"], answer: 2 },
 
-      // POLITIQUE
+      // POLITIQUE & PRÉSIDENTS
       { cat: "Politique", q: "Qui est le président actuel de la France ?", options: ["Nicolas Sarkozy", "Emmanuel Macron", "François Hollande", "Marine Le Pen"], answer: 1 },
       { cat: "Politique", q: "Qui est le président du Sénégal élu en 2024 ?", options: ["Macky Sall", "Ousmane Sonko", "Bassirou Diomaye Faye", "Abdoulaye Wade"], answer: 2 },
       { cat: "Politique", q: "Dans quel bâtiment réside officiellement le président des États-Unis ?", options: ["Le Pentagone", "La Maison-Blanche", "Le Capitole", "L'Empire State"], answer: 1 },
+      { cat: "Politique", q: "Où se trouve le siège principal de l'Union Africaine ?", options: ["Nairobi", "Addis-Abeba", "Johannesburg", "Dakar"], answer: 1 },
+      { cat: "Politique", q: "Qui a été le premier président de la République de Afrique du Sud post-apartheid ?", options: ["Thabo Mbeki", "Jacob Zuma", "Nelson Mandela", "Cyril Ramaphosa"], answer: 2 },
 
-      // HISTOIRE
+      // HISTOIRE MONDIALE
       { cat: "Histoire", q: "En quelle année la plupart des pays africains francophones ont-ils obtenu leur indépendance ?", options: ["1950", "1960", "1975", "1980"], answer: 1 },
       { cat: "Histoire", q: "Qui fut le premier Premier ministre de la RDC indépendante ?", options: ["Joseph Kasa-Vubu", "Patrice Lumumba", "Mobutu Sese Seko", "Moïse Tshombe"], answer: 1 },
       { cat: "Histoire", q: "En quelle année s'est terminée la Seconde Guerre mondiale ?", options: ["1918", "1939", "1945", "1950"], answer: 2 },
-      { cat: "Histoire", q: "Quel célèbre dirigeant a lutté contre l'Apartheid en Afrique du Sud ?", options: ["Kofi Annan", "Nelson Mandela", "Thomas Sankara", "Kwame Nkrumah"], answer: 1 },
+      { cat: "Histoire", q: "Quelle civilisation ancienne a construit les grandes Pyramides de Gizeh ?", options: ["Les Romains", "Les Grecs", "Les Égyptiens", "Les Mayas"], answer: 2 },
+      { cat: "Histoire", q: "Qui était le célèbre empereur de l'Empire du Mali au 14e siècle, réputé très riche ?", options: ["Sundiata Keïta", "Mansa Moussa", "Samory Touré", "Behanzin"], answer: 1 },
 
-      // SCIENCES
+      // SCIENCES & NATURE
       { cat: "Sciences", q: "Quel est le symbole chimique de l'eau ?", options: ["CO2", "H2O", "O2", "NaCl"], answer: 1 },
-      { cat: "Sciences", q: "Quelle planète est la plus proche du Soleil ?", options: ["Vénus", "Terre", "Mars", "Mercure"], answer: 3 },
+      { cat: "Sciences", q: "Quelle planète est surnommée la 'Planète Rouge' ?", options: ["Vénus", "Terre", "Mars", "Jupiter"], answer: 2 },
       { cat: "Sciences", q: "Quel organe est responsable du pompage du sang dans le corps humain ?", options: ["Le Foie", "Le Cerveau", "Le Cœur", "Les Poumons"], answer: 2 },
-      { cat: "Sciences", q: "Quel est le gaz le plus abondant dans l'atmosphère terrestre ?", options: ["Oxygène", "Azote", "Dioxyde de carbone", "Hydrogène"], answer: 1 },
+      { cat: "Sciences", q: "Quel est l'animal le plus rapide au monde à la course terrestre ?", options: ["Le Lion", "Le Guépard", "L'Antilope", "Le Lévrier"], answer: 1 },
+      { cat: "Sciences", q: "Combien de dents possède un adulte humain complet (avec dents de sagesse) ?", options: ["28", "30", "32", "36"], answer: 2 },
 
-      // TECHNOLOGIE
+      // TECHNOLOGIE & INFORMATIQUE
       { cat: "Technologie", q: "Que signifie l'acronyme HTML en développement web ?", options: ["HyperText Markup Language", "High Tech Multi Language", "Hyperlink Text Mode Logic", "Home Tool Markup Language"], answer: 0 },
-      { cat: "Technologie", q: "Qui est le fondateur principal de la société Microsoft ?", options: ["Steve Jobs", "Mark Zuckerberg", "Bill Gates", "Elon Musk"], answer: 2 },
+      { cat: "Technologie", q: "Qui est le fondateur de la société Microsoft ?", options: ["Steve Jobs", "Mark Zuckerberg", "Bill Gates", "Elon Musk"], answer: 2 },
       { cat: "Technologie", q: "Quel système d'exploitation mobile est développé par Google ?", options: ["iOS", "Android", "Windows Phone", "Symbian"], answer: 1 },
+      { cat: "Technologie", q: "Que signifie 'Wi-Fi' dans le réseau informatique ?", options: ["Wireless Fidelity", "Wired Fiber", "Wide Frequency", "Web Filter"], answer: 0 },
 
-      // SPORT
-      { cat: "Sport", q: "Quel pays a remporté la Coupe du Monde de Football en 2022 ?", options: ["France", "Brésil", "Argentine", "Allemagne"], answer: 2 },
-      { cat: "Sport", q: "Combien de joueurs composent une équipe de football sur le terrain ?", options: ["9", "10", "11", "12"], answer: 2 },
-      { cat: "Sport", q: "Dans quel sport s'illustre le champion LeBron James ?", options: ["Football", "Tennis", "Basketball", "Athlétisme"], answer: 2 },
+      // SPORT INTERNATIONAL
+      { cat: "Sport", q: "Quel pays a remporté la Coupe du Monde de Football masculin en 2022 ?", options: ["France", "Brésil", "Argentine", "Allemagne"], answer: 2 },
+      { cat: "Sport", q: "Combien de temps dure un match de football professionnel (hors prolongations) ?", options: ["80 minutes", "90 minutes", "100 minutes", "60 minutes"], answer: 1 },
+      { cat: "Sport", q: "Dans quel sport illustre-toi le champion mondial Usain Bolt ?", options: ["Basketball", "Natation", "Athlétisme (Sprint)", "Boxe"], answer: 2 },
+      { cat: "Sport", q: "Quel pays a accueilli les Jeux Olympiques d'été en 2024 ?", options: ["Japon", "États-Unis", "France", "Chine"], answer: 2 },
 
-      // CULTURE & LITTÉRATURE
+      // CULTURE & ARTS
       { cat: "Culture", q: "Qui a peint la célèbre œuvre 'La Joconde' (Mona Lisa) ?", options: ["Pablo Picasso", "Léonard de Vinci", "Vincent van Gogh", "Claude Monet"], answer: 1 },
-      { cat: "Culture", q: "Quelle est la langue la plus parlée au monde par son nombre de locuteurs natifs ?", options: ["L'Anglais", "L'Espagnol", "Le Mandarin", "L'Arabe"], answer: 2 },
-      { cat: "Culture", q: "Qui est l'auteur du roman 'L'Enfant Noir' ?", options: ["Camara Laye", "Chinua Achebe", "Ahmadou Kourouma", "Mariama Bâ"], answer: 0 }
+      { cat: "Culture", q: "Quelle est la langue officielle la plus parlée en Amérique Latine ?", options: ["Le Portugais", "L'Espagnol", "L'Anglais", "Le Français"], answer: 1 },
+      { cat: "Culture", q: "Qui est l'auteur du célèbre roman 'L'Enfant Noir' ?", options: ["Camara Laye", "Chinua Achebe", "Ahmadou Kourouma", "Mariama Bâ"], answer: 0 }
     ];
 
     class QuizApp {
@@ -174,33 +192,70 @@
         this.score = 0;
         this.hasPlayedOnce = localStorage.getItem('haba_played_once') === 'true';
         this.isRegistered = localStorage.getItem('haba_registered') === 'true';
-
-        this.initCategories();
+        
+        this.checkInitialScreen();
       }
 
-      initCategories() {
-        // Extraire la liste unique des catégories disponibles
+      checkInitialScreen() {
+        const savedCats = localStorage.getItem('haba_selected_categories');
+        if (!savedCats) {
+          // Premier lancement : afficher le setup (cases décochées)
+          this.renderCategoriesSetup();
+          this.showScreen('setup');
+        } else {
+          // Domaines déjà choisis : aller directement à l'accueil
+          this.showScreen('welcome');
+        }
+      }
+
+      renderCategoriesSetup() {
         const categories = [...new Set(questionsBank.map(q => q.cat))];
         const container = document.getElementById('categories-container');
         container.innerHTML = '';
 
+        // Cases NON COCHÉES par défaut pour laisser l'utilisateur choisir lui-même
         categories.forEach(cat => {
           const label = document.createElement('label');
           label.className = 'cat-checkbox';
-          label.innerHTML = `<input type="checkbox" value="${cat}" checked> ${cat}`;
+          label.innerHTML = `<input type="checkbox" value="${cat}"> ${cat}`;
           container.appendChild(label);
         });
       }
 
+      showSetupScreen() {
+        this.renderCategoriesSetup();
+        // Pré-cocher celles sauvegardées si modification
+        const saved = JSON.parse(localStorage.getItem('haba_selected_categories') || '[]');
+        document.querySelectorAll('#categories-container input').forEach(cb => {
+          if (saved.includes(cb.value)) cb.checked = true;
+        });
+        this.showScreen('setup');
+      }
+
+      saveCategoriesAndStart() {
+        const checkedBoxes = document.querySelectorAll('#categories-container input[type="checkbox"]:checked');
+        const selected = Array.from(checkedBoxes).map(cb => cb.value);
+
+        if (selected.length === 0) {
+          alert("Veuillez cocher au moins un domaine !");
+          return;
+        }
+
+        // Sauvegarder pour ne plus demander à chaque fois
+        localStorage.setItem('haba_selected_categories', JSON.stringify(selected));
+
+        if (this.hasPlayedOnce && !this.isRegistered) {
+          this.showScreen('register');
+        } else {
+          this.startQuiz();
+        }
+      }
+
       showScreen(id) {
-        ['welcome', 'register', 'quiz', 'result'].forEach(s => {
+        ['setup', 'welcome', 'register', 'quiz', 'result'].forEach(s => {
           document.getElementById(`screen-${s}`).classList.add('hidden');
         });
         document.getElementById(`screen-${id}`).classList.remove('hidden');
-      }
-
-      showWelcome() {
-        this.showScreen('welcome');
       }
 
       shuffleArray(array) {
@@ -213,26 +268,21 @@
       }
 
       startQuiz() {
-        // Redirection inscription obligatoire après la 1ère partie
         if (this.hasPlayedOnce && !this.isRegistered) {
           this.showScreen('register');
           return;
         }
 
-        // Récupérer les catégories cochées par l'utilisateur
-        const checkedBoxes = document.querySelectorAll('#categories-container input[type="checkbox"]:checked');
-        const selectedCats = Array.from(checkedBoxes).map(cb => cb.value);
+        const savedCats = JSON.parse(localStorage.getItem('haba_selected_categories') || '[]');
+        const filtered = questionsBank.filter(q => savedCats.includes(q.cat));
 
-        if (selectedCats.length === 0) {
-          alert("Veuillez cocher au moins un domaine pour jouer !");
+        if (filtered.length === 0) {
+          this.showSetupScreen();
           return;
         }
 
-        // Filtrer les questions qui correspondent aux choix
-        const filteredQuestions = questionsBank.filter(q => selectedCats.includes(q.cat));
-
-        // Mélanger et sélectionner jusqu'à 10 questions
-        const shuffled = this.shuffleArray(filteredQuestions);
+        // Tirage aléatoire sans répétition
+        const shuffled = this.shuffleArray(filtered);
         this.currentQuestions = shuffled.slice(0, 10);
 
         this.currentIndex = 0;
@@ -292,9 +342,9 @@
         
         let msg = "";
         const ratio = this.score / this.currentQuestions.length;
-        if (ratio >= 0.8) msg = "🏆 Niveau Génie ! Félicitations pour cette excellente performance !";
-        else if (ratio >= 0.5) msg = "👍 Bon travail ! Encore un petit effort pour atteindre la perfection.";
-        else msg = "📚 Continue de t'entraîner dans tes thèmes choisis !";
+        if (ratio >= 0.8) msg = "🏆 Niveau Génie ! Félicitations pour cette performance exceptionnelle !";
+        else if (ratio >= 0.5) msg = "👍 Bon travail ! Continue pour devenir incollable.";
+        else msg = "📚 Bon effort ! Entraîne-toi encore pour progresser.";
         
         document.getElementById('result-message').textContent = msg;
 
@@ -322,7 +372,7 @@
 
     const app = new QuizApp();
 
-    // --- SUPPORT PWA & HORS LIGNE ---
+    // --- SUPPORT HORS LIGNE (PWA) ---
     let deferredPrompt;
     const installBtn = document.getElementById('installBtn');
 
@@ -342,7 +392,7 @@
 
     if ('serviceWorker' in navigator) {
       const swCode = `
-        const CACHE_NAME = 'genies-haba-v3';
+        const CACHE_NAME = 'genies-haba-v4';
         self.addEventListener('install', (e) => {
           e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(['./'])));
         });
