@@ -35,7 +35,7 @@
     header h1 { color: var(--accent); font-size: 1.8rem; margin-bottom: 0.2rem; }
     header p { color: var(--text-muted); font-size: 0.85rem; letter-spacing: 1px; }
 
-    .btn { display: inline-block; width: 100%; padding: 0.8rem 1.5rem; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.2s; text-align: center; margin-top: 1rem; text-decoration: none; }
+    .btn { display: inline-block; width: 100%; padding: 0.8rem 1.5rem; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.2s; text-align: center; margin-top: 0.8rem; text-decoration: none; }
     .btn:hover { background: var(--primary-dark); }
     .btn-secondary { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: var(--text-muted); margin-top: 0.5rem; font-size: 0.85rem; }
     .btn-install { background: var(--accent); color: #000; font-weight: bold; margin-bottom: 1rem; display: none; }
@@ -45,10 +45,6 @@
     .categories-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 1.5rem 0; text-align: left; }
     .cat-checkbox { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); padding: 0.8rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; font-size: 0.95rem; }
     .cat-checkbox input { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
-
-    .input-group { margin-bottom: 1.2rem; }
-    .input-group label { display: block; margin-bottom: 0.4rem; color: var(--text-muted); font-size: 0.9rem; }
-    .input-group input { width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: #0f172a; color: white; font-size: 1rem; }
 
     .options-grid { display: grid; gap: 10px; margin-top: 1.5rem; }
     .option-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 1rem; border-radius: 8px; text-align: left; cursor: pointer; transition: 0.2s; font-size: 1rem; }
@@ -71,47 +67,28 @@
 
     <header>
       <h1>Génies en Herbe</h1>
-      <p>PAR HABA TECHNOLOGIE</p>
+      <p>PAR HABA TECHNOLOGIE • 100% GRATUIT & HORS LIGNE</p>
     </header>
 
-    <!-- Écran de première configuration : Choix des thèmes (S'affiche 1 seule fois au début) -->
+    <!-- Écran de première configuration : Choix des thèmes (Une seule fois au début) -->
     <div id="screen-setup">
-      <h3 style="text-align: center; color: var(--accent); margin-bottom: 0.5rem;">Configuration initiale</h3>
+      <h3 style="text-align: center; color: var(--accent); margin-bottom: 0.5rem;">Bienvenue !</h3>
       <p style="text-align: center; margin-bottom: 1rem; color: var(--text-muted); font-size: 0.9rem;">
-        Cochez les domaines qui vous intéressent pour vos parties :
+        Cochez les domaines qui vous intéressent pour jouer immédiatement :
       </p>
 
       <div class="categories-grid" id="categories-container"></div>
 
-      <button class="btn" onclick="app.saveCategoriesAndStart()">Valider mes choix et Jouer</button>
+      <button class="btn" onclick="app.saveCategoriesAndStart()">Valider et Lancer la Partie</button>
     </div>
 
-    <!-- Écran d'accueil direct (Pour les parties suivantes) -->
+    <!-- Écran d'accueil principal (Pour relancer les parties) -->
     <div id="screen-welcome" class="hidden" style="text-align: center;">
       <p style="margin-bottom: 1.5rem; color: var(--text-muted);">
-        Prêt à tester vos connaissances dans vos domaines choisis ?
+        Prêt à jouer hors ligne dans vos domaines sélectionnés ?
       </p>
-      <button class="btn" onclick="app.startQuiz()">Lancer une Partie (10 Questions)</button>
+      <button class="btn" onclick="app.startQuiz()">Jouer une Partie (10 Questions)</button>
       <button class="btn btn-secondary" onclick="app.showSetupScreen()">⚙️ Modifier mes domaines</button>
-    </div>
-
-    <!-- Écran d'enregistrement unique après la 1ère partie -->
-    <div id="screen-register" class="hidden">
-      <h2 style="text-align: center; margin-bottom: 0.5rem;">Inscription rapide</h2>
-      <p style="text-align: center; color: var(--text-muted); margin-bottom: 1.5rem;">
-        Bravo pour votre première partie ! Inscrivez-vous une seule fois pour enregistrer votre profil.
-      </p>
-      <form onsubmit="app.handleRegister(event)">
-        <div class="input-group">
-          <label>Nom complet</label>
-          <input type="text" id="reg-name" required placeholder="Ex: Jean Dupont">
-        </div>
-        <div class="input-group">
-          <label>Numéro WhatsApp / Téléphone</label>
-          <input type="tel" id="reg-phone" required placeholder="Ex: +243 810 000 000">
-        </div>
-        <button type="submit" class="btn">Enregistrer et Continuer</button>
-      </form>
     </div>
 
     <!-- Écran du Quiz -->
@@ -131,13 +108,13 @@
       <h2>Partie terminée !</h2>
       <div class="score-badge" id="final-score">0 / 10</div>
       <p id="result-message" style="color: var(--text-muted); margin-bottom: 1.5rem;"></p>
-      <button class="btn" onclick="app.startQuiz()">Rejouer une autre partie</button>
+      <button class="btn" onclick="app.startQuiz()">Rejouer une partie</button>
       <button class="btn btn-secondary" onclick="app.showSetupScreen()">⚙️ Changer mes domaines</button>
     </div>
   </div>
 
   <script>
-    // --- VASTE BANQUE DE QUESTIONS DU MONDE ENTIER ---
+    // --- VASTE BANQUE DE QUESTIONS MONDIALES ET HORS LIGNE ---
     const questionsBank = [
       // GÉOGRAPHIE DU MONDE
       { cat: "Géographie", q: "Quelle est la capitale de la République Démocratique du Congo ?", options: ["Lubumbashi", "Kinshasa", "Goma", "Kikwit"], answer: 1 },
@@ -156,14 +133,14 @@
       { cat: "Politique", q: "Qui est le président du Sénégal élu en 2024 ?", options: ["Macky Sall", "Ousmane Sonko", "Bassirou Diomaye Faye", "Abdoulaye Wade"], answer: 2 },
       { cat: "Politique", q: "Dans quel bâtiment réside officiellement le président des États-Unis ?", options: ["Le Pentagone", "La Maison-Blanche", "Le Capitole", "L'Empire State"], answer: 1 },
       { cat: "Politique", q: "Où se trouve le siège principal de l'Union Africaine ?", options: ["Nairobi", "Addis-Abeba", "Johannesburg", "Dakar"], answer: 1 },
-      { cat: "Politique", q: "Qui a été le premier président de la République de Afrique du Sud post-apartheid ?", options: ["Thabo Mbeki", "Jacob Zuma", "Nelson Mandela", "Cyril Ramaphosa"], answer: 2 },
+      { cat: "Politique", q: "Qui a été le premier président de la République d'Afrique du Sud post-apartheid ?", options: ["Thabo Mbeki", "Jacob Zuma", "Nelson Mandela", "Cyril Ramaphosa"], answer: 2 },
 
       // HISTOIRE MONDIALE
       { cat: "Histoire", q: "En quelle année la plupart des pays africains francophones ont-ils obtenu leur indépendance ?", options: ["1950", "1960", "1975", "1980"], answer: 1 },
       { cat: "Histoire", q: "Qui fut le premier Premier ministre de la RDC indépendante ?", options: ["Joseph Kasa-Vubu", "Patrice Lumumba", "Mobutu Sese Seko", "Moïse Tshombe"], answer: 1 },
       { cat: "Histoire", q: "En quelle année s'est terminée la Seconde Guerre mondiale ?", options: ["1918", "1939", "1945", "1950"], answer: 2 },
       { cat: "Histoire", q: "Quelle civilisation ancienne a construit les grandes Pyramides de Gizeh ?", options: ["Les Romains", "Les Grecs", "Les Égyptiens", "Les Mayas"], answer: 2 },
-      { cat: "Histoire", q: "Qui était le célèbre empereur de l'Empire du Mali au 14e siècle, réputé très riche ?", options: ["Sundiata Keïta", "Mansa Moussa", "Samory Touré", "Behanzin"], answer: 1 },
+      { cat: "Histoire", q: "Qui était le célèbre empereur de l'Empire du Mali au 14e siècle ?", options: ["Sundiata Keïta", "Mansa Moussa", "Samory Touré", "Behanzin"], answer: 1 },
 
       // SCIENCES & NATURE
       { cat: "Sciences", q: "Quel est le symbole chimique de l'eau ?", options: ["CO2", "H2O", "O2", "NaCl"], answer: 1 },
@@ -174,14 +151,14 @@
 
       // TECHNOLOGIE & INFORMATIQUE
       { cat: "Technologie", q: "Que signifie l'acronyme HTML en développement web ?", options: ["HyperText Markup Language", "High Tech Multi Language", "Hyperlink Text Mode Logic", "Home Tool Markup Language"], answer: 0 },
-      { cat: "Technologie", q: "Qui est le fondateur de la société Microsoft ?", options: ["Steve Jobs", "Mark Zuckerberg", "Bill Gates", "Elon Musk"], answer: 2 },
+      { cat: "Technologie", q: "Qui est le fondateur principal de la société Microsoft ?", options: ["Steve Jobs", "Mark Zuckerberg", "Bill Gates", "Elon Musk"], answer: 2 },
       { cat: "Technologie", q: "Quel système d'exploitation mobile est développé par Google ?", options: ["iOS", "Android", "Windows Phone", "Symbian"], answer: 1 },
       { cat: "Technologie", q: "Que signifie 'Wi-Fi' dans le réseau informatique ?", options: ["Wireless Fidelity", "Wired Fiber", "Wide Frequency", "Web Filter"], answer: 0 },
 
       // SPORT INTERNATIONAL
       { cat: "Sport", q: "Quel pays a remporté la Coupe du Monde de Football masculin en 2022 ?", options: ["France", "Brésil", "Argentine", "Allemagne"], answer: 2 },
-      { cat: "Sport", q: "Combien de temps dure un match de football professionnel (hors prolongations) ?", options: ["80 minutes", "90 minutes", "100 minutes", "60 minutes"], answer: 1 },
-      { cat: "Sport", q: "Dans quel sport illustre-toi le champion mondial Usain Bolt ?", options: ["Basketball", "Natation", "Athlétisme (Sprint)", "Boxe"], answer: 2 },
+      { cat: "Sport", q: "Combien de temps dure un match de football professionnel ?", options: ["80 minutes", "90 minutes", "100 minutes", "60 minutes"], answer: 1 },
+      { cat: "Sport", q: "Dans quel sport s'illustre le champion mondial Usain Bolt ?", options: ["Basketball", "Natation", "Athlétisme (Sprint)", "Boxe"], answer: 2 },
       { cat: "Sport", q: "Quel pays a accueilli les Jeux Olympiques d'été en 2024 ?", options: ["Japon", "États-Unis", "France", "Chine"], answer: 2 },
 
       // CULTURE & ARTS
@@ -195,8 +172,6 @@
         this.currentQuestions = [];
         this.currentIndex = 0;
         this.score = 0;
-        this.hasPlayedOnce = localStorage.getItem('haba_played_once') === 'true';
-        this.isRegistered = localStorage.getItem('haba_registered') === 'true';
         
         this.checkInitialScreen();
       }
@@ -204,11 +179,11 @@
       checkInitialScreen() {
         const savedCats = localStorage.getItem('haba_selected_categories');
         if (!savedCats) {
-          // Premier lancement : afficher le setup (cases décochées)
+          // Premier lancement : choisir les thèmes
           this.renderCategoriesSetup();
           this.showScreen('setup');
         } else {
-          // Domaines déjà choisis : aller directement à l'accueil
+          // Thèmes déjà enregistrés : aller directement à l'accueil
           this.showScreen('welcome');
         }
       }
@@ -218,7 +193,6 @@
         const container = document.getElementById('categories-container');
         container.innerHTML = '';
 
-        // Cases NON COCHÉES par défaut
         categories.forEach(cat => {
           const label = document.createElement('label');
           label.className = 'cat-checkbox';
@@ -245,18 +219,12 @@
           return;
         }
 
-        // Sauvegarder pour ne plus demander à chaque fois
         localStorage.setItem('haba_selected_categories', JSON.stringify(selected));
-
-        if (this.hasPlayedOnce && !this.isRegistered) {
-          this.showScreen('register');
-        } else {
-          this.startQuiz();
-        }
+        this.startQuiz();
       }
 
       showScreen(id) {
-        ['setup', 'welcome', 'register', 'quiz', 'result'].forEach(s => {
+        ['setup', 'welcome', 'quiz', 'result'].forEach(s => {
           document.getElementById(`screen-${s}`).classList.add('hidden');
         });
         document.getElementById(`screen-${id}`).classList.remove('hidden');
@@ -272,11 +240,6 @@
       }
 
       startQuiz() {
-        if (this.hasPlayedOnce && !this.isRegistered) {
-          this.showScreen('register');
-          return;
-        }
-
         const savedCats = JSON.parse(localStorage.getItem('haba_selected_categories') || '[]');
         const filtered = questionsBank.filter(q => savedCats.includes(q.cat));
 
@@ -285,7 +248,6 @@
           return;
         }
 
-        // Tirage aléatoire sans répétition
         const shuffled = this.shuffleArray(filtered);
         this.currentQuestions = shuffled.slice(0, 10);
 
@@ -339,44 +301,22 @@
       }
 
       endQuiz() {
-        localStorage.setItem('haba_played_once', 'true');
-        this.hasPlayedOnce = true;
-
         document.getElementById('final-score').textContent = `${this.score} / ${this.currentQuestions.length}`;
         
         let msg = "";
         const ratio = this.score / this.currentQuestions.length;
-        if (ratio >= 0.8) msg = "🏆 Niveau Génie ! Félicitations pour cette performance exceptionnelle !";
-        else if (ratio >= 0.5) msg = "👍 Bon travail ! Continue pour devenir incollable.";
+        if (ratio >= 0.8) msg = "🏆 Niveau Génie ! Félicitations pour cette performance !";
+        else if (ratio >= 0.5) msg = "👍 Bon travail ! Continue pour perfectionner tes connaissances.";
         else msg = "📚 Bon effort ! Entraîne-toi encore pour progresser.";
         
         document.getElementById('result-message').textContent = msg;
-
-        if (!this.isRegistered) {
-          setTimeout(() => this.showScreen('register'), 1500);
-        } else {
-          this.showScreen('result');
-        }
-      }
-
-      handleRegister(e) {
-        e.preventDefault();
-        const name = document.getElementById('reg-name').value;
-        const phone = document.getElementById('reg-phone').value;
-
-        if (name && phone) {
-          localStorage.setItem('haba_registered', 'true');
-          localStorage.setItem('haba_user_name', name);
-          localStorage.setItem('haba_user_phone', phone);
-          this.isRegistered = true;
-          this.showScreen('result');
-        }
+        this.showScreen('result');
       }
     }
 
     const app = new QuizApp();
 
-    // --- SUPPORT PWA ET BOUTON D'INSTALLATION AUTOMATIQUE ---
+    // --- MISE EN CACHE TOTALE HORS LIGNE (PWA) ---
     let deferredPrompt;
     const installBtn = document.getElementById('installBtn');
 
@@ -396,12 +336,27 @@
 
     if ('serviceWorker' in navigator) {
       const swCode = `
-        const CACHE_NAME = 'genies-haba-v5';
+        const CACHE_NAME = 'genies-haba-v6';
+        const ASSETS = ['./', './index.html', './manifest.json'];
+        
         self.addEventListener('install', (e) => {
-          e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(['./', './index.html', './manifest.json'])));
+          e.waitUntil(
+            caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting())
+          );
         });
+
+        self.addEventListener('activate', (e) => {
+          e.waitUntil(
+            caches.keys().then(keys => Promise.all(
+              keys.map(key => { if (key !== CACHE_NAME) return caches.delete(key); })
+            )).then(() => self.clients.claim())
+          );
+        });
+
         self.addEventListener('fetch', (e) => {
-          e.respondWith(caches.match(e.request).then(response => response || fetch(e.request)));
+          e.respondWith(
+            caches.match(e.request).then(response => response || fetch(e.request))
+          );
         });
       `;
       const blob = new Blob([swCode], { type: 'application/javascript' });
