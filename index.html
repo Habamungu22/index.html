@@ -5,10 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Génies en Herbe - Haba Technologie</title>
   
-  <!-- Lien vers le Manifest PWA -->
   <link rel="manifest" href="manifest.json">
-
-  <!-- Configuration PWA Mobile -->
   <meta name="theme-color" content="#2563eb">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -31,6 +28,10 @@
     body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem; }
     
     .app-container { width: 100%; max-width: 650px; background: var(--card-bg); border-radius: 16px; padding: 2rem; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); position: relative; }
+    
+    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .sound-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 50%; width: 40px; height: 40px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
     header { text-align: center; margin-bottom: 1.5rem; }
     header h1 { color: var(--accent); font-size: 1.8rem; margin-bottom: 0.2rem; }
     header p { color: var(--text-muted); font-size: 0.85rem; letter-spacing: 1px; }
@@ -62,32 +63,35 @@
 <body>
 
   <div class="app-container">
-    <!-- Bouton d'installation PWA -->
-    <button id="installBtn" class="btn btn-install">📲 Installer l'application sur mon appareil</button>
+    <div class="top-bar">
+      <button id="installBtn" class="btn btn-install" style="margin: 0; width: auto;">📲 Installer</button>
+      <div style="flex-grow: 1;"></div>
+      <button class="sound-btn" id="soundToggle" onclick="soundController.toggleSound()">🔊</button>
+    </div>
 
     <header>
       <h1>Génies en Herbe</h1>
       <p>PAR HABA TECHNOLOGIE • 100% GRATUIT & HORS LIGNE</p>
     </header>
 
-    <!-- Écran de première configuration : Choix des thèmes (Une seule fois au début) -->
+    <!-- Écran de configuration initiale -->
     <div id="screen-setup">
       <h3 style="text-align: center; color: var(--accent); margin-bottom: 0.5rem;">Bienvenue !</h3>
       <p style="text-align: center; margin-bottom: 1rem; color: var(--text-muted); font-size: 0.9rem;">
-        Cochez les domaines qui vous intéressent pour jouer immédiatement :
+        Cochez vos domaines préférés pour commencer :
       </p>
 
       <div class="categories-grid" id="categories-container"></div>
 
-      <button class="btn" onclick="app.saveCategoriesAndStart()">Valider et Lancer la Partie</button>
+      <button class="btn" onclick="app.saveCategoriesAndStart()">Valider et Jouer</button>
     </div>
 
-    <!-- Écran d'accueil principal (Pour relancer les parties) -->
+    <!-- Écran d'accueil -->
     <div id="screen-welcome" class="hidden" style="text-align: center;">
       <p style="margin-bottom: 1.5rem; color: var(--text-muted);">
-        Prêt à jouer hors ligne dans vos domaines sélectionnés ?
+        Prêt à tester vos connaissances hors ligne ?
       </p>
-      <button class="btn" onclick="app.startQuiz()">Jouer une Partie (10 Questions)</button>
+      <button class="btn" onclick="app.startQuiz()">Lancer une Partie (10 Questions)</button>
       <button class="btn btn-secondary" onclick="app.showSetupScreen()">⚙️ Modifier mes domaines</button>
     </div>
 
@@ -114,9 +118,94 @@
   </div>
 
   <script>
-    // --- VASTE BANQUE DE QUESTIONS MONDIALES ET HORS LIGNE ---
+    // --- GESTIONNAIRE DE SON (SYNTHÉTISEUR NATIVE / HORS LIGNE) ---
+    class SoundController {
+      constructor() {
+        this.enabled = true;
+        this.audioCtx = null;
+      }
+
+      initContext() {
+        if (!this.audioCtx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.audioCtx = new AudioContext();
+        }
+      }
+
+      toggleSound() {
+        this.enabled = !this.enabled;
+        document.getElementById('soundToggle').textContent = this.enabled ? '🔊' : '🔇';
+      }
+
+      playCorrect() {
+        if (!this.enabled) return;
+        this.initContext();
+        
+        const osc = this.audioCtx.createOscillator();
+        const gain = this.audioCtx.createGain();
+        
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, this.audioCtx.currentTime); // Note C5
+        osc.frequency.exponentialRampToValueAtTime(659.25, this.audioCtx.currentTime + 0.15); // Note E5
+        
+        gain.gain.setValueAtTime(0.3, this.audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.audioCtx.currentTime + 0.3);
+        
+        osc.connect(gain);
+        gain.connect(this.audioCtx.destination);
+        
+        osc.start();
+        osc.stop(this.audioCtx.currentTime + 0.3);
+      }
+
+      playWrong() {
+        if (!this.enabled) return;
+        this.initContext();
+
+        const osc = this.audioCtx.createOscillator();
+        const gain = this.audioCtx.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, this.audioCtx.currentTime); // Note A3
+        osc.frequency.exponentialRampToValueAtTime(130, this.audioCtx.currentTime + 0.25); // Note C3
+
+        gain.gain.setValueAtTime(0.3, this.audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.audioCtx.currentTime + 0.3);
+
+        osc.connect(gain);
+        gain.connect(this.audioCtx.destination);
+
+        osc.start();
+        osc.stop(this.audioCtx.currentTime + 0.3);
+      }
+
+      playFanfare() {
+        if (!this.enabled) return;
+        this.initContext();
+
+        const notes = [261.63, 329.63, 392.00, 523.25]; // C4, E4, G4, C5
+        notes.forEach((freq, i) => {
+          const osc = this.audioCtx.createOscillator();
+          const gain = this.audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.value = freq;
+          
+          gain.gain.setValueAtTime(0.2, this.audioCtx.currentTime + i * 0.1);
+          gain.gain.exponentialRampToValueAtTime(0.01, this.audioCtx.currentTime + i * 0.1 + 0.3);
+
+          osc.connect(gain);
+          gain.connect(this.audioCtx.destination);
+
+          osc.start(this.audioCtx.currentTime + i * 0.1);
+          osc.stop(this.audioCtx.currentTime + i * 0.1 + 0.3);
+        });
+      }
+    }
+
+    const soundController = new SoundController();
+
+    // --- BANQUE DE QUESTIONS ---
     const questionsBank = [
-      // GÉOGRAPHIE DU MONDE
       { cat: "Géographie", q: "Quelle est la capitale de la République Démocratique du Congo ?", options: ["Lubumbashi", "Kinshasa", "Goma", "Kikwit"], answer: 1 },
       { cat: "Géographie", q: "Quelle est la capitale du Cameroun ?", options: ["Douala", "Garoua", "Yaoundé", "Kribi"], answer: 2 },
       { cat: "Géographie", q: "Quelle est la capitale du Japon ?", options: ["Kyoto", "Osaka", "Tokyo", "Hiroshima"], answer: 2 },
@@ -125,46 +214,15 @@
       { cat: "Géographie", q: "Quel est le plus grand pays du monde par sa superficie ?", options: ["Chine", "États-Unis", "Russie", "Brésil"], answer: 2 },
       { cat: "Géographie", q: "Quel désert est le plus grand désert chaud du monde ?", options: ["Désert du Kalahari", "Désert de Gobi", "Le Sahara", "Désert d'Atacama"], answer: 2 },
       { cat: "Géographie", q: "Quelle est la capitale de la Côte d'Ivoire ?", options: ["Abidjan", "Yamoussoukro", "Bouaké", "San-Pédro"], answer: 1 },
-      { cat: "Géographie", q: "Sur quel continent se trouve le Brésil ?", options: ["Afrique", "Asie", "Amérique du Sud", "Europe"], answer: 2 },
-      { cat: "Géographie", q: "Quelle est la capitale de l'Australie ?", options: ["Sydney", "Melbourne", "Canberra", "Brisbane"], answer: 2 },
-
-      // POLITIQUE & PRÉSIDENTS
       { cat: "Politique", q: "Qui est le président actuel de la France ?", options: ["Nicolas Sarkozy", "Emmanuel Macron", "François Hollande", "Marine Le Pen"], answer: 1 },
       { cat: "Politique", q: "Qui est le président du Sénégal élu en 2024 ?", options: ["Macky Sall", "Ousmane Sonko", "Bassirou Diomaye Faye", "Abdoulaye Wade"], answer: 2 },
-      { cat: "Politique", q: "Dans quel bâtiment réside officiellement le président des États-Unis ?", options: ["Le Pentagone", "La Maison-Blanche", "Le Capitole", "L'Empire State"], answer: 1 },
-      { cat: "Politique", q: "Où se trouve le siège principal de l'Union Africaine ?", options: ["Nairobi", "Addis-Abeba", "Johannesburg", "Dakar"], answer: 1 },
-      { cat: "Politique", q: "Qui a été le premier président de la République d'Afrique du Sud post-apartheid ?", options: ["Thabo Mbeki", "Jacob Zuma", "Nelson Mandela", "Cyril Ramaphosa"], answer: 2 },
-
-      // HISTOIRE MONDIALE
       { cat: "Histoire", q: "En quelle année la plupart des pays africains francophones ont-ils obtenu leur indépendance ?", options: ["1950", "1960", "1975", "1980"], answer: 1 },
       { cat: "Histoire", q: "Qui fut le premier Premier ministre de la RDC indépendante ?", options: ["Joseph Kasa-Vubu", "Patrice Lumumba", "Mobutu Sese Seko", "Moïse Tshombe"], answer: 1 },
-      { cat: "Histoire", q: "En quelle année s'est terminée la Seconde Guerre mondiale ?", options: ["1918", "1939", "1945", "1950"], answer: 2 },
-      { cat: "Histoire", q: "Quelle civilisation ancienne a construit les grandes Pyramides de Gizeh ?", options: ["Les Romains", "Les Grecs", "Les Égyptiens", "Les Mayas"], answer: 2 },
-      { cat: "Histoire", q: "Qui était le célèbre empereur de l'Empire du Mali au 14e siècle ?", options: ["Sundiata Keïta", "Mansa Moussa", "Samory Touré", "Behanzin"], answer: 1 },
-
-      // SCIENCES & NATURE
       { cat: "Sciences", q: "Quel est le symbole chimique de l'eau ?", options: ["CO2", "H2O", "O2", "NaCl"], answer: 1 },
       { cat: "Sciences", q: "Quelle planète est surnommée la 'Planète Rouge' ?", options: ["Vénus", "Terre", "Mars", "Jupiter"], answer: 2 },
-      { cat: "Sciences", q: "Quel organe est responsable du pompage du sang dans le corps humain ?", options: ["Le Foie", "Le Cerveau", "Le Cœur", "Les Poumons"], answer: 2 },
-      { cat: "Sciences", q: "Quel est l'animal le plus rapide au monde à la course terrestre ?", options: ["Le Lion", "Le Guépard", "L'Antilope", "Le Lévrier"], answer: 1 },
-      { cat: "Sciences", q: "Combien de dents possède un adulte humain complet (avec dents de sagesse) ?", options: ["28", "30", "32", "36"], answer: 2 },
-
-      // TECHNOLOGIE & INFORMATIQUE
       { cat: "Technologie", q: "Que signifie l'acronyme HTML en développement web ?", options: ["HyperText Markup Language", "High Tech Multi Language", "Hyperlink Text Mode Logic", "Home Tool Markup Language"], answer: 0 },
-      { cat: "Technologie", q: "Qui est le fondateur principal de la société Microsoft ?", options: ["Steve Jobs", "Mark Zuckerberg", "Bill Gates", "Elon Musk"], answer: 2 },
-      { cat: "Technologie", q: "Quel système d'exploitation mobile est développé par Google ?", options: ["iOS", "Android", "Windows Phone", "Symbian"], answer: 1 },
-      { cat: "Technologie", q: "Que signifie 'Wi-Fi' dans le réseau informatique ?", options: ["Wireless Fidelity", "Wired Fiber", "Wide Frequency", "Web Filter"], answer: 0 },
-
-      // SPORT INTERNATIONAL
       { cat: "Sport", q: "Quel pays a remporté la Coupe du Monde de Football masculin en 2022 ?", options: ["France", "Brésil", "Argentine", "Allemagne"], answer: 2 },
-      { cat: "Sport", q: "Combien de temps dure un match de football professionnel ?", options: ["80 minutes", "90 minutes", "100 minutes", "60 minutes"], answer: 1 },
-      { cat: "Sport", q: "Dans quel sport s'illustre le champion mondial Usain Bolt ?", options: ["Basketball", "Natation", "Athlétisme (Sprint)", "Boxe"], answer: 2 },
-      { cat: "Sport", q: "Quel pays a accueilli les Jeux Olympiques d'été en 2024 ?", options: ["Japon", "États-Unis", "France", "Chine"], answer: 2 },
-
-      // CULTURE & ARTS
-      { cat: "Culture", q: "Qui a peint la célèbre œuvre 'La Joconde' (Mona Lisa) ?", options: ["Pablo Picasso", "Léonard de Vinci", "Vincent van Gogh", "Claude Monet"], answer: 1 },
-      { cat: "Culture", q: "Quelle est la langue officielle la plus parlée en Amérique Latine ?", options: ["Le Portugais", "L'Espagnol", "L'Anglais", "Le Français"], answer: 1 },
-      { cat: "Culture", q: "Qui est l'auteur du célèbre roman 'L'Enfant Noir' ?", options: ["Camara Laye", "Chinua Achebe", "Ahmadou Kourouma", "Mariama Bâ"], answer: 0 }
+      { cat: "Culture", q: "Qui a peint la célèbre œuvre 'La Joconde' (Mona Lisa) ?", options: ["Pablo Picasso", "Léonard de Vinci", "Vincent van Gogh", "Claude Monet"], answer: 1 }
     ];
 
     class QuizApp {
@@ -172,18 +230,15 @@
         this.currentQuestions = [];
         this.currentIndex = 0;
         this.score = 0;
-        
         this.checkInitialScreen();
       }
 
       checkInitialScreen() {
         const savedCats = localStorage.getItem('haba_selected_categories');
         if (!savedCats) {
-          // Premier lancement : choisir les thèmes
           this.renderCategoriesSetup();
           this.showScreen('setup');
         } else {
-          // Thèmes déjà enregistrés : aller directement à l'accueil
           this.showScreen('welcome');
         }
       }
@@ -285,9 +340,11 @@
         if (selectedIndex === q.answer) {
           buttonEl.classList.add('correct');
           this.score++;
+          soundController.playCorrect(); // Joue le son de bonne réponse
         } else {
           buttonEl.classList.add('incorrect');
           buttons[q.answer].classList.add('correct');
+          soundController.playWrong(); // Joue le son de mauvaise réponse
         }
 
         setTimeout(() => {
@@ -301,13 +358,14 @@
       }
 
       endQuiz() {
+        soundController.playFanfare(); // Joue la fanfare de fin
         document.getElementById('final-score').textContent = `${this.score} / ${this.currentQuestions.length}`;
         
         let msg = "";
         const ratio = this.score / this.currentQuestions.length;
-        if (ratio >= 0.8) msg = "🏆 Niveau Génie ! Félicitations pour cette performance !";
-        else if (ratio >= 0.5) msg = "👍 Bon travail ! Continue pour perfectionner tes connaissances.";
-        else msg = "📚 Bon effort ! Entraîne-toi encore pour progresser.";
+        if (ratio >= 0.8) msg = "🏆 Niveau Génie ! Félicitations !";
+        else if (ratio >= 0.5) msg = "👍 Bon travail ! Continue comme ça.";
+        else msg = "📚 Continue à t'entraîner !";
         
         document.getElementById('result-message').textContent = msg;
         this.showScreen('result');
@@ -316,7 +374,7 @@
 
     const app = new QuizApp();
 
-    // --- MISE EN CACHE TOTALE HORS LIGNE (PWA) ---
+    // PWA Service Worker
     let deferredPrompt;
     const installBtn = document.getElementById('installBtn');
 
@@ -336,7 +394,7 @@
 
     if ('serviceWorker' in navigator) {
       const swCode = `
-        const CACHE_NAME = 'genies-haba-v6';
+        const CACHE_NAME = 'genies-sound-v1';
         const ASSETS = ['./', './index.html', './manifest.json'];
         
         self.addEventListener('install', (e) => {
@@ -361,7 +419,6 @@
       `;
       const blob = new Blob([swCode], { type: 'application/javascript' });
       const swUrl = URL.createObjectURL(blob);
-      
       navigator.serviceWorker.register(swUrl).catch(err => console.log('SW fail:', err));
     }
   </script>
